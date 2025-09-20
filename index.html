@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>thoda sa behen ka loda hai kya ?</title>
+<style>
+  body{margin:0;font-family:sans-serif;background:#fff7fb;display:flex;align-items:center;justify-content:center;height:100vh;}
+  .card{background:#fff;padding:30px;border-radius:18px;box-shadow:0 8px 30px rgba(0,0,0,0.08);text-align:center;max-width:500px;}
+  h1{margin-bottom:10px;color:#111827;}
+  .question{padding:12px;background:rgba(255,77,148,0.06);border-radius:12px;margin-bottom:12px;font-size:18px;}
+  .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+  button{padding:12px 20px;border-radius:12px;border:none;cursor:pointer;font-weight:600;}
+  .yes{background:linear-gradient(90deg,#ff5588,#ff7ab3);color:white;}
+  .no{background:transparent;border:1px solid #ccc;color:#111;}
+  #overlay{position:fixed;inset:0;display:none;background:rgba(0,0,0,0.4);align-items:center;justify-content:center;}
+  .modal{background:white;padding:20px;border-radius:12px;text-align:center;max-width:400px;}
+  #confetti{position:fixed;top:0;left:0;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>thoda sa behen ka loda hai kya?</h1>
+  <div class="question" id="questionText">thoda sa behen ka loda hai kya ?</div>
+  <div class="actions">
+    <button class="yes" id="yesBtn">Yes</button>
+    <button class="no" id="noBtn">No</button>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<div id="overlay">
+  <div class="modal">
+    <h3>i know tu kutta hai ❤️❤️</h3>
+    <button id="closeModal">Close</button>
+  </div>
+</div>
+
+<script>
+const questions=[
+  "thoda sa behen ka loda hai kya",
+  "achha to chutiya hai",
+  "to bhadwa hoga",
+  "gandu hai",
+  "Chalo ab gaandmast mat kar"
+];
+
+let index=0;
+const questionText=document.getElementById('questionText');
+const yesBtn=document.getElementById('yesBtn');
+const noBtn=document.getElementById('noBtn');
+const overlay=document.getElementById('overlay');
+const closeModal=document.getElementById('closeModal');
+const canvas=document.getElementById('confetti');
+const ctx=canvas.getContext('2d');
+let W=canvas.width=window.innerWidth;
+let H=canvas.height=window.innerHeight;
+window.addEventListener('resize',()=>{W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight;});
+
+let confettiPieces=[];
+function random(min,max){return Math.random()*(max-min)+min;}
+function createConfetti(x,y){
+  for(let i=0;i<50;i++){
+    confettiPieces.push({x:x+random(-30,30),y:y+random(-30,30),vx:random(-5,5),vy:random(-10,-2),size:random(5,10),color:['#ff75b1','#ffd16f','#7be3f3','#ffa5d6','#9b84ff'][Math.floor(random(0,5))],life:random(50,100)});
+  }
+}
+function updateConfetti(){
+  ctx.clearRect(0,0,W,H);
+  for(let i=confettiPieces.length-1;i>=0;i--){
+    const p=confettiPieces[i];
+    p.vy+=0.3; p.x+=p.vx; p.y+=p.vy; p.life--;
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x,p.y,p.size,p.size);
+    if(p.y>H||p.life<=0) confettiPieces.splice(i,1);
+  }
+  if(confettiPieces.length) requestAnimationFrame(updateConfetti);
+}
+
+yesBtn.onclick=()=>{
+  overlay.style.display='flex';
+  createConfetti(W/2,H/3);
+  updateConfetti();
+};
+
+closeModal.onclick=()=>{overlay.style.display='none'; index=0; questionText.textContent=questions[index];};
+
+let avoidCount=0;
+noBtn.addEventListener('mouseenter',()=>{
+  if(index>=questions.length-1) return;
+  avoidCount++;
+  const parent=noBtn.parentElement;
+  const rect=parent.getBoundingClientRect();
+  const btnRect=noBtn.getBoundingClientRect();
+  const maxX=Math.max(0, rect.width-btnRect.width);
+  const maxY=Math.max(0, rect.height-btnRect.height);
+  const x=random(0,maxX);
+  const y=random(0,maxY);
+  noBtn.style.transform=`translate(${x}px,${y}px)`;
+});
+
+noBtn.addEventListener('click',()=>{
+  if(index<questions.length-1){
+    index++;
+    questionText.textContent=questions[index];
+    noBtn.style.transform=`translate(0,0)`;
+  }
+});
+</script>
+
+</body>
+</html>
